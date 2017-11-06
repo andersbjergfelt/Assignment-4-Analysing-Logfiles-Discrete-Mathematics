@@ -14,76 +14,96 @@ import java.util.HashMap;
  * @author abj
  */
 public class DynamicAnalyser {
-    
+
     ArrayList<String> input;
-    HashMap<Integer,LogEntry> logs;
+    HashMap<Integer, LogEntry> logs;
     ArrayList<String> output;
-    public DynamicAnalyser(){
+
+    public DynamicAnalyser() {
         input = new ArrayList<>();
         logs = new HashMap<>();
         output = new ArrayList<>();
     }
-    
+
     public static void main(String[] args) {
-        
+
         DynamicAnalyser da = new DynamicAnalyser();
+
+        da.addInstance(1000, 1, "A", System.currentTimeMillis() - 5000);
+        da.addInstance(1000, 1, "B", System.currentTimeMillis() - 4000);
+        da.addInstance(1000, 1, "C", System.currentTimeMillis() - 3000);
+        da.addInstance(1000, 1, "D", System.currentTimeMillis() - 2000);
+        da.addInstance(1000, 1, "F", System.currentTimeMillis() - 1000);
+        da.addInstance(1000, 1, "F", System.currentTimeMillis() - 500);
+        da.addInstance(1000, 1, "G", System.currentTimeMillis() - 200);
+
+        da.addInstance(1000, 2, "A", System.currentTimeMillis() - 5000);
+        da.addInstance(1000, 2, "B", System.currentTimeMillis() - 4000);
+        da.addInstance(1000, 2, "C", System.currentTimeMillis() - 3000);
+        da.addInstance(1000, 2, "B", System.currentTimeMillis() - 2000);
+        da.addInstance(1000, 2, "E", System.currentTimeMillis() - 1000);
+        da.addInstance(1000, 2, "A", System.currentTimeMillis() - 500);
         
-        da.addInstance(new LogEntry(1000, 1, "A", System.currentTimeMillis()));
-        da.addInstance(new LogEntry(1000, 1, "B", System.currentTimeMillis()));
-        da.addInstance(new LogEntry(1000, 1, "C", System.currentTimeMillis()));
-        da.addInstance(new LogEntry(1000, 1, "D", System.currentTimeMillis()));
-        da.addInstance(new LogEntry(1000, 1, "A", System.currentTimeMillis()));
-        
+        da.addInstance(1000, 3, "A", System.currentTimeMillis() - 25000);
+        da.addInstance(1000, 3, "B", System.currentTimeMillis() - 25000);
+
         da.checkLevel();
         da.printResult();
     }
-    
-    public void addInstance(LogEntry log){
-        Date d = new Date(log.getTimestamp());
-        input.add("SystemID: " + log.getSystemID() + "  InstanceID: " + log.getInstanceID() + "  ActionID: " + log.getActionID() + "  TimeStamp: " + d.toString());
-        LogEntry l = logs.get(log.getInstanceID());
-        
-        if(l == null){
-            log.setState(2);
-            logs.put(log.getInstanceID(), log);
+
+    public void addInstance(int systemID, int instanceID, String actionID, long timeStamp) {
+        Date d = new Date(timeStamp);
+        input.add("SystemID: " + systemID + "  InstanceID: " + instanceID + "  ActionID: " + actionID + "  TimeStamp: " + d.toString());
+        LogEntry log = logs.get(instanceID);
+
+        if (log == null) {
+            LogEntry tmpLog = new LogEntry(systemID, instanceID, actionID, timeStamp);
+            tmpLog.setState(2);
+            logs.put(tmpLog.getInstanceID(), tmpLog);
         } else {
-            switch(l.getState()){
-                case 2:
-                    if(l.getActionID() == "B" || l.getActionID() == "C"){
-                        l.setLevel(LogEntry.Level.INFORMATION);
-                    } else if(l.getActionID() == "D") {
-                        l.setLevel(LogEntry.Level.INFORMATION);
-                        l.setState(3);
-                    } else if(l.getActionID() == "E") {
-                        l.setLevel(LogEntry.Level.INFORMATION);
-                        l.setState(4);
-                    } else {
-                        l.setLevel(LogEntry.Level.ERROR);
-                    }
-                    break;
-                case 3:
-                    if(l.getActionID() == "F"){
-                        l.setLevel(LogEntry.Level.INFORMATION);
-                    } else if(l.getActionID() == "G") {
-                        l.setLevel(LogEntry.Level.INFORMATION);
-                        l.setState(4);
-                    } else {
-                        l.setLevel(LogEntry.Level.ERROR);
-                    }
-                    break;
-                case 4:
-                    l.setLevel(LogEntry.Level.ERROR);
-                    break;
+            log.setActionID(actionID);
+            log.setTimestamp(timeStamp);
+            if (log.getTimestamp() < System.currentTimeMillis() - 20000) {
+                log.setLevel(LogEntry.Level.WARNING);
+            } else {
+                switch (log.getState()) {
+                    case 2:
+                        if (log.getActionID() == "B" || log.getActionID() == "C") {
+                            log.setLevel(LogEntry.Level.INFORMATION);
+                        } else if (log.getActionID() == "D") {
+                            log.setLevel(LogEntry.Level.INFORMATION);
+                            log.setState(3);
+                        } else if (log.getActionID() == "E") {
+                            log.setLevel(LogEntry.Level.INFORMATION);
+                            log.setState(4);
+                        } else {
+                            log.setLevel(LogEntry.Level.ERROR);
+                        }
+                        break;
+                    case 3:
+                        if (log.getActionID() == "F") {
+                            log.setLevel(LogEntry.Level.INFORMATION);
+                        } else if (log.getActionID() == "G") {
+                            log.setLevel(LogEntry.Level.INFORMATION);
+                            log.setState(4);
+                        } else {
+                            log.setLevel(LogEntry.Level.ERROR);
+                        }
+                        break;
+                    case 4:
+                        log.setLevel(LogEntry.Level.ERROR);
+                        break;
+                }
             }
-            logs.put(l.getInstanceID(), l);
-            output.add("Level: " + l.getLevel() + "  SystemID: " + l.getSystemID() + "  InstanceID: " + l.getInstanceID() + "  ActionID: " + l.getActionID());
+            logs.put(log.getInstanceID(), log);
+            output.add("Level: " + log.getLevel() + "  SystemID: " + log.getSystemID() + "  InstanceID: " + log.getInstanceID() + "  ActionID: " + log.getActionID());
         }
     }
-    
-    public void checkLevel(){
+
+    public void checkLevel() {
         for (int i = 0; i < logs.size(); i++) {
             LogEntry log = logs.get(i);
-            
+
 //            switch(log.getState()){
 //                case 1:
 //                    if(!log.getActionID().equals("A")){
@@ -112,13 +132,13 @@ public class DynamicAnalyser {
 //            }
         }
     }
-    
-    public void printResult(){
+
+    public void printResult() {
         System.out.println("----- LOG INPUT -----");
         for (int i = 0; i < input.size(); i++) {
             System.out.println(input.get(i));
         }
-        
+
         System.out.println("");
         System.out.println("----- LOG OUTPUT -----");
         for (int i = 0; i < output.size(); i++) {
