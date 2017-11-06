@@ -24,12 +24,11 @@ public class LogEntry {
         WARNING, INFORMATION, ERROR
     }
 
-    public LogEntry(int systemID, int instanceID, String actionID, long timestamp, int state) {
+    public LogEntry(int systemID, int instanceID, String actionID, long timestamp) {
         this.systemID = systemID;
         this.instanceID = instanceID;
         this.actionID = actionID;
         this.timestamp = timestamp;
-        this.state = state;
     }
 
     public int getState() {
