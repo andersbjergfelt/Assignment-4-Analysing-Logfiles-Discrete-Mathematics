@@ -5,6 +5,7 @@
  */
 package com.daef.analysinglogfiles;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -13,10 +14,20 @@ import java.util.Date;
  */
 public class DynamicAnalyser {
     
+    FSA fsa;
+    
     public static void main(String[] args) {
         
-        LogEntry logEntry = new LogEntry(null, 1, 1, 3, new Date());
+        ArrayList<LogEntry> logs = new ArrayList();
         
+        logs.add(new LogEntry(1000, 1, "A", System.currentTimeMillis()-6000, 1));
+        logs.add(new LogEntry(1000, 1, "B", System.currentTimeMillis()-5000, 2));
+        logs.add(new LogEntry(1000, 1, "C", System.currentTimeMillis()-4000, 2));
+        logs.add(new LogEntry(1000, 1, "D", System.currentTimeMillis()-3000, 2));
+        logs.add(new LogEntry(1000, 1, "F", System.currentTimeMillis()-1000, 3));
+        logs.add(new LogEntry(1000, 1, "G", System.currentTimeMillis()-500, 3));
+        
+        fsa = new FSA(logs);
         
     }
 }

@@ -20,12 +20,6 @@ public class FSA {
     
     public HashMap<Integer, LogEntry> instances  = new HashMap();        
     
-    
-    
-   
-    
-    
-    
     //checks if instance is already defined
     private boolean checkForInstance(int instanceID){
         
@@ -40,11 +34,6 @@ public class FSA {
         listOfInstances.add(entry.getInstanceID());
           
     }
-    
-    
-    
-    
-    
     
     //Give a list of the running instances
     public List<Integer> getListOfInstances() {
